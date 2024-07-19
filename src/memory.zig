@@ -1,6 +1,6 @@
 const std = @import("std");
 
-// Number of addressable memory locations.
+/// Number of addressable memory locations.
 pub const size = std.math.maxInt(u16);
 
 var memory = [_]u16{0} ** size;
