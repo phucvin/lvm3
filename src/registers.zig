@@ -1,3 +1,5 @@
+const std = @import("std");
+
 /// CPU registers.
 pub const Reg = enum {
     // General-purpose.
@@ -13,11 +15,9 @@ pub const Reg = enum {
     pc,
     // Condition flags.
     cond,
-    // Number of registers (not a register itself).
-    count,
 };
 
-var registers = [_]u16{0} ** @intFromEnum(Reg.count);
+var registers = [_]u16{0} ** (@intFromEnum(Reg.cond) + 1);
 
 /// Read the value in a register.
 pub fn read(reg: Reg) u16 {
@@ -27,4 +27,23 @@ pub fn read(reg: Reg) u16 {
 /// Write a value to a register.
 pub fn write(reg: Reg, val: u16) void {
     registers[@intFromEnum(reg)] = val;
+}
+
+test "registers read and write" {
+    comptime var reg = Reg.r0;
+    comptime var val = 21;
+    write(reg, val);
+    try std.testing.expectEqual(val, read(reg));
+
+    reg = Reg.r7;
+    val = 0xFFFF;
+    write(reg, val);
+    try std.testing.expectEqual(val, read(reg));
+    try std.testing.expectEqual(0, read(Reg.r6));
+    try std.testing.expectEqual(0, read(Reg.pc));
+
+    reg = Reg.cond;
+    val = 0b1010;
+    write(reg, val);
+    try std.testing.expectEqual(val, read(reg));
 }
