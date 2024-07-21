@@ -11,10 +11,17 @@ pub const Reg = enum {
     r5,
     r6,
     r7,
-    // Program counter.
+    // Program counter (not directly addressable).
     pc,
-    // Condition flags.
+    // Condition flags (not directly addressable).
     cond,
+};
+
+/// Condition flags.
+pub const Cond = enum(u16) {
+    pos = 1 << 0,
+    zro = 1 << 1,
+    neg = 1 << 2,
 };
 
 var registers = [_]u16{0} ** (@intFromEnum(Reg.cond) + 1);
