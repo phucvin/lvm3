@@ -15,7 +15,7 @@ pub fn main() !void {
 
     while (true) {
         const instr = try memory.read(registers.read(Reg.pc));
-        const op = @as(Op, @enumFromInt(instr >> 12));
+        const op = cpu.getOp(instr);
         registers.incPc();
 
         switch (op) {
