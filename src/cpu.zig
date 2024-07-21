@@ -1,5 +1,5 @@
 /// Instruction opcodes.
-pub const Op = enum {
+pub const Op = enum(u4) {
     br, // Branch.
     add, // Add.
     ld, // Load.
