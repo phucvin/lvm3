@@ -13,7 +13,7 @@ pub const Reg = enum {
     r7,
     // Program counter (not directly addressable).
     pc,
-    // Condition flags (not directly addressable).
+    // Condition flag (not directly addressable, only one should be set at a time).
     cond,
 };
 
@@ -36,6 +36,15 @@ pub fn write(reg: Reg, val: u16) void {
     registers[@intFromEnum(reg)] = val;
 }
 
+/// Increment the program counter. Saturates at 0xFFFF.
+pub fn incPc() void {
+    const pc = read(Reg.pc);
+    if (pc == 0xFFFF) {
+        return;
+    }
+    write(Reg.pc, pc + 1);
+}
+
 test "registers read and write" {
     comptime var reg = Reg.r0;
     comptime var val = 21;
@@ -53,4 +62,18 @@ test "registers read and write" {
     val = 0b1010;
     write(reg, val);
     try std.testing.expectEqual(val, read(reg));
+}
+
+test "increment program counter" {
+    incPc();
+    try std.testing.expectEqual(1, read(Reg.pc));
+
+    write(Reg.pc, 1000);
+    incPc();
+    incPc();
+    try std.testing.expectEqual(1002, read(Reg.pc));
+
+    write(Reg.pc, 0xFFFF);
+    incPc();
+    try std.testing.expectEqual(0xFFFF, read(Reg.pc));
 }
