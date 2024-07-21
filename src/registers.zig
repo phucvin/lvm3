@@ -13,15 +13,15 @@ pub const Reg = enum {
     r7,
     // Program counter (not directly addressable).
     pc,
-    // Condition flag (not directly addressable, only one should be set at a time).
+    // Condition flag (not directly addressable, exactly one flag should always be set).
     cond,
 };
 
 /// Condition flags.
 pub const Cond = enum(u16) {
-    pos = 1 << 0,
-    zro = 1 << 1,
-    neg = 1 << 2,
+    p = 1 << 0,
+    z = 1 << 1,
+    n = 1 << 2,
 };
 
 var registers = [_]u16{0} ** (@intFromEnum(Reg.cond) + 1);
@@ -43,6 +43,11 @@ pub fn incPc() void {
         return;
     }
     write(Reg.pc, pc + 1);
+}
+
+/// Set the condition flag.
+pub fn setCond(cond: Cond) void {
+    write(Reg.cond, @intFromEnum(cond));
 }
 
 test "registers read and write" {
@@ -76,4 +81,15 @@ test "increment program counter" {
     write(Reg.pc, 0xFFFF);
     incPc();
     try std.testing.expectEqual(0xFFFF, read(Reg.pc));
+}
+
+test "set condition flag" {
+    setCond(Cond.p);
+    try std.testing.expectEqual(1 << 0, read(Reg.cond));
+
+    setCond(Cond.z);
+    try std.testing.expectEqual(1 << 1, read(Reg.cond));
+
+    setCond(Cond.n);
+    try std.testing.expectEqual(1 << 2, read(Reg.cond));
 }
