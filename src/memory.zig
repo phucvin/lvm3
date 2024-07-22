@@ -44,6 +44,8 @@ test "memory read and write" {
     write(addr, val);
     try std.testing.expectEqual(val, read(addr));
     try std.testing.expectEqual(0, read(addr + 1));
+
+    reset();
 }
 
 test "memory reset" {

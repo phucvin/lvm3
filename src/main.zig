@@ -30,7 +30,7 @@ pub fn main() void {
             .rti => unreachable,
             .not => cpu.not(instr),
             .ldi => cpu.ldi(instr),
-            .sti => unreachable,
+            .sti => cpu.sti(instr),
             .jmp => unreachable,
             .res => unreachable,
             .lea => unreachable,

@@ -134,6 +134,13 @@ pub fn ldi(instr: u16) void {
     registers.updateCondFromReg(dr);
 }
 
+/// Execute a store indirect instruction.
+pub fn sti(instr: u16) void {
+    const sr: Reg = @enumFromInt((instr >> 9) & 0x7);
+    const pc_offset = utils.sext(instr & 0x1FF, 9);
+    memory.write(memory.read(registers.read(Reg.pc) + pc_offset), registers.read(sr));
+}
+
 test "get opcode from instruction" {
     try std.testing.expectEqual(Op.br, getOp(0b0000_0000_0000_0000));
     try std.testing.expectEqual(Op.add, getOp(0b0001_0000_0000_0000));
@@ -351,6 +358,29 @@ test "load indirect" {
 
     ldi(0b1010_001_000000000);
     try std.testing.expectEqual(0, registers.read(Reg.r1));
+
+    registers.reset();
+    memory.reset();
+}
+
+test "store indirect" {
+    registers.write(Reg.pc, 0x2000);
+    registers.write(Reg.r0, 0x5000);
+    registers.write(Reg.r1, 500);
+    registers.write(Reg.r2, 111);
+
+    memory.write(0x2008, 10);
+    memory.write(0x2007, 0xFFFE);
+    memory.write(0x2000, 1);
+
+    sti(0b1011_000_000001000);
+    try std.testing.expectEqual(0x5000, memory.read(10));
+
+    sti(0b1011_001_000000111);
+    try std.testing.expectEqual(500, memory.read(0xFFFE));
+
+    sti(0b1011_010_000000000);
+    try std.testing.expectEqual(111, memory.read(1));
 
     registers.reset();
     memory.reset();

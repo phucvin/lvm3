@@ -5,9 +5,7 @@ pub fn sext(num: u16, comptime og_bits: u4) u16 {
     if (og_bits == 0) {
         return 0;
     }
-
     const shift = 16 - @as(u16, og_bits);
-
     // Need to cast to i16 to ensure arithmetic right shift.
     return @bitCast(@as(i16, @bitCast(num << shift)) >> shift);
 }
