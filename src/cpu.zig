@@ -118,6 +118,14 @@ pub fn str(instr: u16) void {
     memory.write(registers.read(base_r) + offset, registers.read(sr));
 }
 
+/// Execute a bitwise NOT instruction.
+pub fn not(instr: u16) void {
+    const dr: Reg = @enumFromInt((instr >> 9) & 0x7);
+    const sr: Reg = @enumFromInt((instr >> 6) & 0x7);
+    registers.write(dr, ~registers.read(sr));
+    registers.updateCondFromReg(dr);
+}
+
 test "get opcode from instruction" {
     try std.testing.expectEqual(Op.br, getOp(0b0000_0000_0000_0000));
     try std.testing.expectEqual(Op.add, getOp(0b0001_0000_0000_0000));
@@ -299,4 +307,23 @@ test "store register" {
 
     registers.reset();
     memory.reset();
+}
+
+test "bitwise not" {
+    registers.write(Reg.r0, 0b1100_0000_1111_1010);
+    registers.write(Reg.r1, 0b1111_1111_1111_1100);
+
+    not(0b1001_010_000_111111);
+    try std.testing.expectEqual(0b0011_1111_0000_0101, registers.read(Reg.r2));
+
+    not(0b1001_010_001_111111);
+    try std.testing.expectEqual(0b0000_0000_0000_0011, registers.read(Reg.r2));
+
+    not(0b1001_010_010_111111);
+    try std.testing.expectEqual(0b1111_1111_1111_1100, registers.read(Reg.r2));
+
+    not(0b1001_000_111_111111);
+    try std.testing.expectEqual(0b1111_1111_1111_1111, registers.read(Reg.r0));
+
+    registers.reset();
 }

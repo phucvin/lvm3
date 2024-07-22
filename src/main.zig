@@ -28,7 +28,7 @@ pub fn main() void {
             .ldr => cpu.ldr(instr),
             .str => cpu.str(instr),
             .rti => unreachable,
-            .not => unreachable,
+            .not => cpu.not(instr),
             .ldi => unreachable,
             .sti => unreachable,
             .jmp => unreachable,
