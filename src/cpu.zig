@@ -126,6 +126,14 @@ pub fn not(instr: u16) void {
     registers.updateCondFromReg(dr);
 }
 
+/// Execute a load indirect instruction.
+pub fn ldi(instr: u16) void {
+    const dr: Reg = @enumFromInt((instr >> 9) & 0x7);
+    const pc_offset = utils.sext(instr & 0x1FF, 9);
+    registers.write(dr, memory.read(memory.read(registers.read(Reg.pc) + pc_offset)));
+    registers.updateCondFromReg(dr);
+}
+
 test "get opcode from instruction" {
     try std.testing.expectEqual(Op.br, getOp(0b0000_0000_0000_0000));
     try std.testing.expectEqual(Op.add, getOp(0b0001_0000_0000_0000));
@@ -326,4 +334,24 @@ test "bitwise not" {
     try std.testing.expectEqual(0b1111_1111_1111_1111, registers.read(Reg.r0));
 
     registers.reset();
+}
+
+test "load indirect" {
+    registers.write(Reg.pc, 0x1000);
+    memory.write(0x1008, 0x4000);
+    memory.write(0x4000, 42);
+    ldi(0b1010_000_000001000);
+    try std.testing.expectEqual(42, registers.read(Reg.r0));
+
+    memory.write(0x1008, 0x4001);
+    memory.write(0x4001, 80);
+    registers.incPc();
+    ldi(0b1010_001_000000111);
+    try std.testing.expectEqual(80, registers.read(Reg.r1));
+
+    ldi(0b1010_001_000000000);
+    try std.testing.expectEqual(0, registers.read(Reg.r1));
+
+    registers.reset();
+    memory.reset();
 }

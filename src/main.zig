@@ -29,7 +29,7 @@ pub fn main() void {
             .str => cpu.str(instr),
             .rti => unreachable,
             .not => cpu.not(instr),
-            .ldi => unreachable,
+            .ldi => cpu.ldi(instr),
             .sti => unreachable,
             .jmp => unreachable,
             .res => unreachable,
