@@ -141,6 +141,12 @@ pub fn sti(instr: u16) void {
     memory.write(memory.read(registers.read(Reg.pc) + pc_offset), registers.read(sr));
 }
 
+/// Execute a jump instruction (also handles return from subroutine).
+pub fn jmp(instr: u16) void {
+    const base_r: Reg = @enumFromInt((instr >> 6) & 0x7);
+    registers.write(Reg.pc, registers.read(base_r));
+}
+
 test "get opcode from instruction" {
     try std.testing.expectEqual(Op.br, getOp(0b0000_0000_0000_0000));
     try std.testing.expectEqual(Op.add, getOp(0b0001_0000_0000_0000));
@@ -384,4 +390,21 @@ test "store indirect" {
 
     registers.reset();
     memory.reset();
+}
+
+test "jump" {
+    registers.write(Reg.r0, 0x4000);
+    registers.write(Reg.r1, 0x5000);
+    registers.write(Reg.r7, 0x3000);
+
+    jmp(0b1100_000_000_000000);
+    try std.testing.expectEqual(0x4000, registers.read(Reg.pc));
+
+    jmp(0b1100_000_001_000000);
+    try std.testing.expectEqual(0x5000, registers.read(Reg.pc));
+
+    jmp(0b1100_000_111_000000);
+    try std.testing.expectEqual(0x3000, registers.read(Reg.pc));
+
+    registers.reset();
 }

@@ -31,7 +31,7 @@ pub fn main() void {
             .not => cpu.not(instr),
             .ldi => cpu.ldi(instr),
             .sti => cpu.sti(instr),
-            .jmp => unreachable,
+            .jmp => cpu.jmp(instr),
             .res => unreachable,
             .lea => unreachable,
             .trap => unreachable,
