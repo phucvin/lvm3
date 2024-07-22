@@ -51,7 +51,7 @@ pub fn setCond(cond: Cond) void {
 }
 
 /// Update the condition flag based on the value in a register.
-pub fn updateCond(reg: Reg) void {
+pub fn updateCondFromReg(reg: Reg) void {
     const val = read(reg);
     if (val == 0) {
         setCond(Cond.z);
@@ -106,16 +106,16 @@ test "set condition flag" {
     try std.testing.expectEqual(1 << 2, read(Reg.cond));
 }
 
-test "update condition flag" {
+test "update condition flag from register" {
     write(Reg.r0, 0);
-    updateCond(Reg.r0);
+    updateCondFromReg(Reg.r0);
     try std.testing.expectEqual(@intFromEnum(Cond.z), read(Reg.cond));
 
     write(Reg.r1, 0b1000_0000_0000_0000);
-    updateCond(Reg.r1);
+    updateCondFromReg(Reg.r1);
     try std.testing.expectEqual(@intFromEnum(Cond.n), read(Reg.cond));
 
     write(Reg.r2, 10);
-    updateCond(Reg.r2);
+    updateCondFromReg(Reg.r2);
     try std.testing.expectEqual(@intFromEnum(Cond.p), read(Reg.cond));
 }
