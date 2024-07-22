@@ -46,8 +46,8 @@ pub fn add(instr: u16) void {
     const sr1: Reg = @enumFromInt((instr >> 6) & 0x7);
     const imm_flag = (instr >> 5) & 0x1;
     if (imm_flag != 0) {
-        const imm5 = utils.sext(instr & 0x1F, 5);
-        registers.write(dr, registers.read(sr1) + imm5);
+        const imm = utils.sext(instr & 0x1F, 5);
+        registers.write(dr, registers.read(sr1) + imm);
     } else {
         const sr2: Reg = @enumFromInt(instr & 0x7);
         registers.write(dr, registers.read(sr1) + registers.read(sr2));
@@ -92,12 +92,21 @@ pub fn and_(instr: u16) void {
     const sr1: Reg = @enumFromInt((instr >> 6) & 0x7);
     const imm_flag = (instr >> 5) & 0x1;
     if (imm_flag != 0) {
-        const imm5 = utils.sext(instr & 0x1F, 5);
-        registers.write(dr, registers.read(sr1) & imm5);
+        const imm = utils.sext(instr & 0x1F, 5);
+        registers.write(dr, registers.read(sr1) & imm);
     } else {
         const sr2: Reg = @enumFromInt(instr & 0x7);
         registers.write(dr, registers.read(sr1) & registers.read(sr2));
     }
+    registers.updateCondFromReg(dr);
+}
+
+/// Execute a load register instruction.
+pub fn ldr(instr: u16) void {
+    const dr: Reg = @enumFromInt((instr >> 9) & 0x7);
+    const base_r: Reg = @enumFromInt((instr >> 6) & 0x7);
+    const offset = utils.sext(instr & 0x3F, 6);
+    registers.write(dr, memory.read(registers.read(base_r) + offset));
     registers.updateCondFromReg(dr);
 }
 
@@ -244,4 +253,23 @@ test "bitwise and" {
     try std.testing.expectEqual(0b1000, registers.read(Reg.r0));
 
     registers.reset();
+}
+
+test "load register" {
+    registers.write(Reg.r0, 0x5000);
+    memory.write(0x5000, 42);
+    memory.write(0x5001, 0xa);
+    memory.write(0xd, 100);
+
+    ldr(0b0110_001_000_000000);
+    try std.testing.expectEqual(42, registers.read(Reg.r1));
+
+    ldr(0b0110_001_000_000001);
+    try std.testing.expectEqual(10, registers.read(Reg.r1));
+
+    ldr(0b0110_010_001_000011);
+    try std.testing.expectEqual(100, registers.read(Reg.r2));
+
+    registers.reset();
+    memory.reset();
 }
