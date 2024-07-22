@@ -26,7 +26,7 @@ pub fn main() void {
             .jsr => cpu.jsr(instr),
             .and_ => cpu.and_(instr),
             .ldr => cpu.ldr(instr),
-            .str => unreachable,
+            .str => cpu.str(instr),
             .rti => unreachable,
             .not => unreachable,
             .ldi => unreachable,

@@ -110,6 +110,14 @@ pub fn ldr(instr: u16) void {
     registers.updateCondFromReg(dr);
 }
 
+/// Execute a store register instruction.
+pub fn str(instr: u16) void {
+    const sr: Reg = @enumFromInt((instr >> 9) & 0x7);
+    const base_r: Reg = @enumFromInt((instr >> 6) & 0x7);
+    const offset = utils.sext(instr & 0x3F, 6);
+    memory.write(registers.read(base_r) + offset, registers.read(sr));
+}
+
 test "get opcode from instruction" {
     try std.testing.expectEqual(Op.br, getOp(0b0000_0000_0000_0000));
     try std.testing.expectEqual(Op.add, getOp(0b0001_0000_0000_0000));
@@ -269,6 +277,25 @@ test "load register" {
 
     ldr(0b0110_010_001_000011);
     try std.testing.expectEqual(100, registers.read(Reg.r2));
+
+    registers.reset();
+    memory.reset();
+}
+
+test "store register" {
+    registers.write(Reg.r0, 0x5000);
+    registers.write(Reg.r1, 42);
+    registers.write(Reg.r2, 0xa);
+    registers.write(Reg.r3, 100);
+
+    str(0b0111_000_001_000000);
+    try std.testing.expectEqual(0x5000, memory.read(42));
+
+    str(0b0111_001_010_000001);
+    try std.testing.expectEqual(42, memory.read(0xb));
+
+    str(0b0111_010_011_000011);
+    try std.testing.expectEqual(0xa, memory.read(103));
 
     registers.reset();
     memory.reset();
