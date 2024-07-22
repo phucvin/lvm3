@@ -70,6 +70,22 @@ pub fn st(instr: u16) void {
     memory.write(registers.read(Reg.pc) + pc_offset, registers.read(sr));
 }
 
+/// Execute a jump register instruction.
+pub fn jsr(instr: u16) void {
+    const pc = registers.read(Reg.pc);
+    registers.write(Reg.r7, pc);
+    const imm_flag = (instr >> 11) & 0x1;
+    if (imm_flag != 0) {
+        // JSR.
+        const pc_offset = utils.sext(instr & 0x7FF, 11);
+        registers.write(Reg.pc, pc + pc_offset);
+    } else {
+        // JSRR.
+        const base_r: Reg = @enumFromInt((instr >> 6) & 0x7);
+        registers.write(Reg.pc, registers.read(base_r));
+    }
+}
+
 test "get opcode from instruction" {
     try std.testing.expectEqual(Op.br, getOp(0b0000_0000_0000_0000));
     try std.testing.expectEqual(Op.add, getOp(0b0001_0000_0000_0000));
@@ -174,4 +190,23 @@ test "store" {
 
     registers.reset();
     memory.reset();
+}
+
+test "jump register" {
+    registers.write(Reg.pc, 0x3000);
+    jsr(0b0100_1_00000_001010);
+    try std.testing.expectEqual(0x3000, registers.read(Reg.r7));
+    try std.testing.expectEqual(0x300a, registers.read(Reg.pc));
+
+    registers.write(Reg.r1, 0x3001);
+    jsr(0b0100_0_00001_000000);
+    try std.testing.expectEqual(0x300a, registers.read(Reg.r7));
+    try std.testing.expectEqual(0x3001, registers.read(Reg.pc));
+
+    registers.write(Reg.r6, 0x4000);
+    jsr(0b0100_0_00110_000001);
+    try std.testing.expectEqual(0x3001, registers.read(Reg.r7));
+    try std.testing.expectEqual(0x4000, registers.read(Reg.pc));
+
+    registers.reset();
 }
