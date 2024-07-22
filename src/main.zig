@@ -22,7 +22,7 @@ pub fn main() void {
             .br => cpu.br(instr),
             .add => cpu.add(instr),
             .ld => cpu.ld(instr),
-            .st => unreachable,
+            .st => cpu.st(instr),
             .jsr => unreachable,
             .and_ => unreachable,
             .ldr => unreachable,
