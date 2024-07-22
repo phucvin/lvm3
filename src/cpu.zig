@@ -39,6 +39,21 @@ pub fn br(instr: u16) void {
     }
 }
 
+/// Execute an add instruction.
+pub fn add(instr: u16) void {
+    const dr: Reg = @enumFromInt((instr >> 9) & 0x7);
+    const sr1: Reg = @enumFromInt((instr >> 6) & 0x7);
+    const imm_flag = (instr >> 5) & 0x1;
+    if (imm_flag != 0) {
+        const imm5 = utils.sext(instr & 0x1F, 5);
+        registers.write(dr, registers.read(sr1) + imm5);
+    } else {
+        const sr2: Reg = @enumFromInt(instr & 0x7);
+        registers.write(dr, registers.read(sr1) + registers.read(sr2));
+    }
+    registers.updateCondFromReg(dr);
+}
+
 test "get opcode from instruction" {
     try std.testing.expectEqual(Op.br, getOp(0b0000_0000_0000_0000));
     try std.testing.expectEqual(Op.add, getOp(0b0001_0000_0000_0000));
@@ -62,22 +77,42 @@ test "branch" {
     registers.write(Reg.pc, 0x3000);
 
     registers.setCond(Cond.z);
-    br(0b0000_0100_0000_0011);
+    br(0b0000_010_000000011);
     try std.testing.expectEqual(0x3003, registers.read(Reg.pc));
-    br(0b0000_1100_0000_0001);
+    br(0b0000_110_000000001);
     try std.testing.expectEqual(0x3004, registers.read(Reg.pc));
 
     registers.setCond(Cond.p);
-    br(0b0000_1100_0000_0111);
+    br(0b0000_110_000000111);
     try std.testing.expectEqual(0x3004, registers.read(Reg.pc));
-    br(0b0000_1110_0000_0111);
+    br(0b0000_111_000000111);
     try std.testing.expectEqual(0x300b, registers.read(Reg.pc));
 
     registers.setCond(Cond.n);
-    br(0b0000_1110_0000_0000);
+    br(0b0000_111_000000000);
     try std.testing.expectEqual(0x300b, registers.read(Reg.pc));
-    br(0b0000_1000_0000_0010);
+    br(0b0000_100_000000010);
     try std.testing.expectEqual(0x300d, registers.read(Reg.pc));
+
+    registers.reset();
+}
+
+test "add" {
+    registers.write(Reg.r0, 1);
+    registers.write(Reg.r1, 2);
+    registers.write(Reg.r2, 3);
+
+    add(0b0101_000_001_0_00010);
+    try std.testing.expectEqual(5, registers.read(Reg.r0));
+
+    add(0b0101_001_010_0_00000);
+    try std.testing.expectEqual(8, registers.read(Reg.r1));
+
+    add(0b0101_010_011_1_01111);
+    try std.testing.expectEqual(15, registers.read(Reg.r2));
+
+    add(0b0101_000_100_1_00000);
+    try std.testing.expectEqual(0, registers.read(Reg.r0));
 
     registers.reset();
 }

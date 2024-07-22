@@ -20,7 +20,7 @@ pub fn main() !void {
 
         switch (op) {
             .br => cpu.br(instr),
-            .add => unreachable,
+            .add => cpu.add(instr),
             .ld => unreachable,
             .st => unreachable,
             .jsr => unreachable,
