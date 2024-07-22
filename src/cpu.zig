@@ -2,6 +2,7 @@ const std = @import("std");
 const registers = @import("registers.zig");
 const utils = @import("utils.zig");
 const memory = @import("memory.zig");
+const tsr = @import("tsr.zig");
 
 const Reg = registers.Reg;
 const Cond = registers.Cond;
@@ -153,6 +154,19 @@ pub fn lea(instr: u16) void {
     const pc_offset = utils.sext(instr & 0x1FF, 9);
     registers.write(dr, registers.read(Reg.pc) + pc_offset);
     registers.updateCondFromReg(dr);
+}
+
+/// Execute a trap instruction.
+pub fn trap(instr: u16) void {
+    const trap_vec: tsr.Vec = @enumFromInt(instr & 0xFF);
+    switch (trap_vec) {
+        tsr.Vec.getc => tsr.getc(),
+        tsr.Vec.out => tsr.out(),
+        tsr.Vec.puts => tsr.puts(),
+        tsr.Vec.in => tsr.in(),
+        tsr.Vec.putsp => tsr.putsp(),
+        tsr.Vec.halt => tsr.halt(),
+    }
 }
 
 test "get opcode from instruction" {

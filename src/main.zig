@@ -34,7 +34,7 @@ pub fn main() void {
             .jmp => cpu.jmp(instr),
             .res => unreachable, // Unused.
             .lea => cpu.lea(instr),
-            .trap => unreachable,
+            .trap => cpu.trap(instr),
         }
     }
 }
