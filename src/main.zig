@@ -27,13 +27,13 @@ pub fn main() void {
             .and_ => cpu.and_(instr),
             .ldr => cpu.ldr(instr),
             .str => cpu.str(instr),
-            .rti => unreachable,
+            .rti => unreachable, // Unused.
             .not => cpu.not(instr),
             .ldi => cpu.ldi(instr),
             .sti => cpu.sti(instr),
             .jmp => cpu.jmp(instr),
-            .res => unreachable,
-            .lea => unreachable,
+            .res => unreachable, // Unused.
+            .lea => cpu.lea(instr),
             .trap => unreachable,
         }
     }

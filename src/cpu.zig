@@ -147,6 +147,14 @@ pub fn jmp(instr: u16) void {
     registers.write(Reg.pc, registers.read(base_r));
 }
 
+/// Execute a load effective address instruction.
+pub fn lea(instr: u16) void {
+    const dr: Reg = @enumFromInt((instr >> 9) & 0x7);
+    const pc_offset = utils.sext(instr & 0x1FF, 9);
+    registers.write(dr, registers.read(Reg.pc) + pc_offset);
+    registers.updateCondFromReg(dr);
+}
+
 test "get opcode from instruction" {
     try std.testing.expectEqual(Op.br, getOp(0b0000_0000_0000_0000));
     try std.testing.expectEqual(Op.add, getOp(0b0001_0000_0000_0000));
@@ -405,6 +413,20 @@ test "jump" {
 
     jmp(0b1100_000_111_000000);
     try std.testing.expectEqual(0x3000, registers.read(Reg.pc));
+
+    registers.reset();
+}
+
+test "load effective address" {
+    registers.write(Reg.pc, 0x8000);
+    lea(0b1110_000_000001000);
+    try std.testing.expectEqual(0x8008, registers.read(Reg.r0));
+
+    lea(0b1110_001_000000111);
+    try std.testing.expectEqual(0x8007, registers.read(Reg.r1));
+
+    lea(0b1110_010_000000000);
+    try std.testing.expectEqual(0x8000, registers.read(Reg.r2));
 
     registers.reset();
 }
