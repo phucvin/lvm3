@@ -86,6 +86,21 @@ pub fn jsr(instr: u16) void {
     }
 }
 
+/// Execute a bitwise AND instruction.
+pub fn and_(instr: u16) void {
+    const dr: Reg = @enumFromInt((instr >> 9) & 0x7);
+    const sr1: Reg = @enumFromInt((instr >> 6) & 0x7);
+    const imm_flag = (instr >> 5) & 0x1;
+    if (imm_flag != 0) {
+        const imm5 = utils.sext(instr & 0x1F, 5);
+        registers.write(dr, registers.read(sr1) & imm5);
+    } else {
+        const sr2: Reg = @enumFromInt(instr & 0x7);
+        registers.write(dr, registers.read(sr1) & registers.read(sr2));
+    }
+    registers.updateCondFromReg(dr);
+}
+
 test "get opcode from instruction" {
     try std.testing.expectEqual(Op.br, getOp(0b0000_0000_0000_0000));
     try std.testing.expectEqual(Op.add, getOp(0b0001_0000_0000_0000));
@@ -207,6 +222,26 @@ test "jump register" {
     jsr(0b0100_0_00110_000001);
     try std.testing.expectEqual(0x3001, registers.read(Reg.r7));
     try std.testing.expectEqual(0x4000, registers.read(Reg.pc));
+
+    registers.reset();
+}
+
+test "bitwise and" {
+    registers.write(Reg.r0, 0b1010);
+    registers.write(Reg.r1, 0b1100);
+    registers.write(Reg.r2, 0b1111);
+
+    and_(0b0101_000_001_0_00010);
+    try std.testing.expectEqual(0b1100, registers.read(Reg.r0));
+
+    and_(0b0101_001_010_0_00000);
+    try std.testing.expectEqual(0b1100, registers.read(Reg.r1));
+
+    and_(0b0101_010_011_1_01111);
+    try std.testing.expectEqual(0b0000, registers.read(Reg.r2));
+
+    and_(0b0101_000_001_1_01001);
+    try std.testing.expectEqual(0b1000, registers.read(Reg.r0));
 
     registers.reset();
 }
