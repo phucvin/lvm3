@@ -19,7 +19,7 @@ pub fn main() !void {
         registers.incPc();
 
         switch (op) {
-            .br => unreachable,
+            .br => cpu.br(instr),
             .add => unreachable,
             .ld => unreachable,
             .st => unreachable,
