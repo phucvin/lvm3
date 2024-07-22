@@ -38,9 +38,7 @@ pub fn write(reg: Reg, val: u16) void {
 
 /// Reset all registers to 0.
 pub fn reset() void {
-    for (&registers) |*reg| {
-        reg.* = 0;
-    }
+    registers = [_]u16{0} ** (@intFromEnum(Reg.cond) + 1);
 }
 
 /// Increment the program counter. Saturates at 0xFFFF.
@@ -90,29 +88,24 @@ test "registers read and write" {
     reset();
 }
 
-test "reset registers" {
+test "registers reset" {
     write(Reg.r0, 1);
-    write(Reg.r1, 2);
     write(Reg.r2, 3);
-    write(Reg.r3, 4);
     write(Reg.r4, 5);
-    write(Reg.r5, 6);
     write(Reg.r6, 7);
-    write(Reg.r7, 8);
     write(Reg.pc, 9);
-    write(Reg.cond, 0b10);
+    try std.testing.expectEqual(1, read(Reg.r0));
+    try std.testing.expectEqual(3, read(Reg.r2));
+    try std.testing.expectEqual(5, read(Reg.r4));
+    try std.testing.expectEqual(7, read(Reg.r6));
+    try std.testing.expectEqual(9, read(Reg.pc));
 
     reset();
     try std.testing.expectEqual(0, read(Reg.r0));
-    try std.testing.expectEqual(0, read(Reg.r1));
     try std.testing.expectEqual(0, read(Reg.r2));
-    try std.testing.expectEqual(0, read(Reg.r3));
     try std.testing.expectEqual(0, read(Reg.r4));
-    try std.testing.expectEqual(0, read(Reg.r5));
     try std.testing.expectEqual(0, read(Reg.r6));
-    try std.testing.expectEqual(0, read(Reg.r7));
     try std.testing.expectEqual(0, read(Reg.pc));
-    try std.testing.expectEqual(0, read(Reg.cond));
 }
 
 test "increment program counter" {

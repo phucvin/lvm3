@@ -1,6 +1,7 @@
 const std = @import("std");
 const registers = @import("registers.zig");
 const utils = @import("utils.zig");
+const memory = @import("memory.zig");
 
 const Reg = registers.Reg;
 const Cond = registers.Cond;
@@ -51,6 +52,14 @@ pub fn add(instr: u16) void {
         const sr2: Reg = @enumFromInt(instr & 0x7);
         registers.write(dr, registers.read(sr1) + registers.read(sr2));
     }
+    registers.updateCondFromReg(dr);
+}
+
+/// Execute a load instruction.
+pub fn ld(instr: u16) void {
+    const dr: Reg = @enumFromInt((instr >> 9) & 0x7);
+    const pc_offset = utils.sext(instr & 0x1FF, 9);
+    registers.write(dr, memory.read(registers.read(Reg.pc) + pc_offset));
     registers.updateCondFromReg(dr);
 }
 
@@ -115,4 +124,27 @@ test "add" {
     try std.testing.expectEqual(0, registers.read(Reg.r0));
 
     registers.reset();
+}
+
+test "load" {
+    registers.write(Reg.pc, 0x3000);
+    memory.write(0x3008, 42);
+    ld(0b0010_000_000001000);
+    try std.testing.expectEqual(42, registers.read(Reg.r0));
+    ld(0b0010_000_000000011);
+    try std.testing.expectEqual(0, registers.read(Reg.r0));
+
+    memory.write(0x3008, 80);
+    registers.incPc();
+    ld(0b0010_001_000000111);
+    try std.testing.expectEqual(80, registers.read(Reg.r1));
+
+    memory.write(0x3008, 0);
+    registers.incPc();
+    registers.incPc();
+    ld(0b0010_001_000000101);
+    try std.testing.expectEqual(0, registers.read(Reg.r1));
+
+    registers.reset();
+    memory.reset();
 }
