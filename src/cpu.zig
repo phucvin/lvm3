@@ -161,7 +161,7 @@ pub fn trap(instr: u16) !void {
     const trap_vec: tsr.Vec = @enumFromInt(instr & 0xFF);
     switch (trap_vec) {
         tsr.Vec.getc => try tsr.getc(),
-        tsr.Vec.out => tsr.out(),
+        tsr.Vec.out => try tsr.out(),
         tsr.Vec.puts => tsr.puts(),
         tsr.Vec.in => tsr.in(),
         tsr.Vec.putsp => tsr.putsp(),

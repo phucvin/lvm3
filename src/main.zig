@@ -14,6 +14,9 @@ pub fn main() !void {
     registers.setCond(Cond.z); // One condition flag should always be set.
     registers.write(Reg.pc, start);
 
+    registers.write(Reg.r0, 35);
+    try tsr.out();
+
     while (true) {
         const instr = memory.read(registers.read(Reg.pc));
         const op = cpu.getOp(instr);
