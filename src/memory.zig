@@ -26,6 +26,16 @@ pub fn reset() void {
     memory = [_]u16{0} ** size;
 }
 
+/// Determine where to place the program in memory.
+pub fn getProgramOrigin(file: std.fs.File) !u16 {
+    var buffer: [2]u8 = undefined;
+    const bytes_read = try file.read(&buffer);
+    if (bytes_read < 2) {
+        return error.InsufficientData;
+    }
+    return std.mem.readInt(u16, &buffer, .big);
+}
+
 test "memory read and write" {
     comptime var addr = 0;
     comptime var val = 42;

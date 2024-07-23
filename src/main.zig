@@ -17,6 +17,12 @@ pub fn main() !void {
     registers.setCond(Cond.z); // One condition flag should always be set.
     registers.write(Reg.pc, start);
 
+    const file = try std.fs.cwd().openFile("test", .{});
+    defer file.close();
+
+    const origin = try memory.getProgramOrigin(file);
+    std.debug.print("Program origin: {}\n", .{origin});
+
     while (true) {
         const instr = memory.read(registers.read(Reg.pc));
         const op = cpu.getOp(instr);
