@@ -1,5 +1,6 @@
 const std = @import("std");
 const registers = @import("registers.zig");
+const memory = @import("memory.zig");
 
 const stdin = std.io.getStdIn();
 const stdout = std.io.getStdOut();
@@ -20,14 +21,22 @@ pub fn getc() !void {
     registers.write(Reg.r0, c);
 }
 
-/// Write a character in R0 to the console.
+/// Write the character in R0 to the console.
 pub fn out() !void {
     const c = registers.read(Reg.r0);
     try stdout.writer().writeByte(@truncate(c));
 }
 
-pub fn puts() void {
-    unreachable;
+/// Write a string of characters from memory to the console.
+pub fn puts() !void {
+    var addr = registers.read(Reg.r0);
+    while (true) : (addr += 1) {
+        const c = memory.read(addr);
+        if (c == 0) {
+            break;
+        }
+        try stdout.writer().writeByte(@truncate(c));
+    }
 }
 
 pub fn in() void {

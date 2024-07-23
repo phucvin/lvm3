@@ -162,7 +162,7 @@ pub fn trap(instr: u16) !void {
     switch (trap_vec) {
         tsr.Vec.getc => try tsr.getc(),
         tsr.Vec.out => try tsr.out(),
-        tsr.Vec.puts => tsr.puts(),
+        tsr.Vec.puts => try tsr.puts(),
         tsr.Vec.in => tsr.in(),
         tsr.Vec.putsp => tsr.putsp(),
         tsr.Vec.halt => tsr.halt(),

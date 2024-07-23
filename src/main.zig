@@ -15,7 +15,11 @@ pub fn main() !void {
     registers.write(Reg.pc, start);
 
     registers.write(Reg.r0, 35);
-    try tsr.out();
+    memory.write(35, 97);
+    memory.write(36, 98);
+    memory.write(37, 99);
+    memory.write(38, 100);
+    try tsr.puts();
 
     while (true) {
         const instr = memory.read(registers.read(Reg.pc));
