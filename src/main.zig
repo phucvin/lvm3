@@ -18,7 +18,9 @@ pub fn main() !void {
     memory.write(0x5000, 0x6261);
     memory.write(0x5001, 0x6463);
     memory.write(0x5002, 0x6665);
+    memory.write(0x5003, 0x000a);
     try tsr.putsp();
+    try tsr.halt();
 
     while (true) {
         const instr = memory.read(registers.read(Reg.pc));
