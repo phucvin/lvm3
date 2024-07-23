@@ -3,6 +3,7 @@ const memory = @import("memory.zig");
 const registers = @import("registers.zig");
 const cpu = @import("cpu.zig");
 const tsr = @import("tsr.zig");
+const terminal = @import("terminal.zig");
 
 const Reg = registers.Reg;
 const Cond = registers.Cond;
@@ -11,21 +12,17 @@ const Op = cpu.Op;
 const start = 0x3000;
 
 pub fn main() !void {
+    terminal.disableCanonAndEcho();
+
     registers.setCond(Cond.z); // One condition flag should always be set.
     registers.write(Reg.pc, start);
-
-    registers.write(Reg.r0, 0x5000);
-    memory.write(0x5000, 0x6261);
-    memory.write(0x5001, 0x6463);
-    memory.write(0x5002, 0x6665);
-    memory.write(0x5003, 0x000a);
-    try tsr.putsp();
-    try tsr.halt();
 
     while (true) {
         const instr = memory.read(registers.read(Reg.pc));
         const op = cpu.getOp(instr);
         registers.incPc();
+
+        try tsr.in();
 
         switch (op) {
             .br => cpu.br(instr),

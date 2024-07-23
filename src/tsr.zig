@@ -19,6 +19,7 @@ pub const Vec = enum(u8) {
 pub fn getc() !void {
     const c = try stdin.reader().readByte();
     registers.write(Reg.r0, c);
+    registers.updateCondFromReg(Reg.r0);
 }
 
 /// Write the character in R0 to the console.
@@ -43,7 +44,9 @@ pub fn puts() !void {
 pub fn in() !void {
     try stdout.writeAll("Enter a character: ");
     const c = try stdin.reader().readByte();
+    try stdout.writer().writeByte(c);
     registers.write(Reg.r0, c);
+    registers.updateCondFromReg(Reg.r0);
 }
 
 /// Write a string of characters from memory to the console, where two characters are
@@ -68,5 +71,5 @@ pub fn putsp() !void {
 /// Halt program execution.
 pub fn halt() !void {
     try stdout.writeAll("Halting execution.\n");
-    std.process.exit(0);
+    std.os.linux.exit(0);
 }
