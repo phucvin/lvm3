@@ -17,11 +17,11 @@ pub fn main() !void {
     registers.setCond(Cond.z); // One condition flag should always be set.
     registers.write(Reg.pc, start);
 
-    const file = try std.fs.cwd().openFile("test", .{});
-    defer file.close();
+    try memory.loadProgram("test");
 
-    const origin = try memory.getProgramOrigin(file);
-    std.debug.print("Program origin: {}\n", .{origin});
+    std.debug.print("1st u16: {}", .{memory.read(0x3030)});
+    std.debug.print("2nd u16: {}", .{memory.read(0x3031)});
+    std.debug.print("3rd u16: {}", .{memory.read(0x3032)});
 
     while (true) {
         const instr = memory.read(registers.read(Reg.pc));
