@@ -1,3 +1,9 @@
+const std = @import("std");
+const registers = @import("registers.zig");
+
+const stdin = std.io.getStdIn();
+const Reg = registers.Reg;
+
 pub const Vec = enum(u8) {
     getc = 0x20,
     out = 0x21,
@@ -7,8 +13,9 @@ pub const Vec = enum(u8) {
     halt = 0x25,
 };
 
-pub fn getc() u16 {
-    unreachable;
+pub fn getc() !void {
+    const c = try stdin.reader().readByte();
+    registers.write(Reg.r0, c);
 }
 
 pub fn out() void {

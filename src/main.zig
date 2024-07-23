@@ -2,6 +2,7 @@ const std = @import("std");
 const memory = @import("memory.zig");
 const registers = @import("registers.zig");
 const cpu = @import("cpu.zig");
+const tsr = @import("tsr.zig");
 
 const Reg = registers.Reg;
 const Cond = registers.Cond;
@@ -9,7 +10,7 @@ const Op = cpu.Op;
 
 const start = 0x3000;
 
-pub fn main() void {
+pub fn main() !void {
     registers.setCond(Cond.z); // One condition flag should always be set.
     registers.write(Reg.pc, start);
 
@@ -34,7 +35,7 @@ pub fn main() void {
             .jmp => cpu.jmp(instr),
             .res => unreachable, // Unused.
             .lea => cpu.lea(instr),
-            .trap => cpu.trap(instr),
+            .trap => try cpu.trap(instr),
         }
     }
 }
