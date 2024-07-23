@@ -39,8 +39,11 @@ pub fn puts() !void {
     }
 }
 
-pub fn in() void {
-    unreachable;
+/// Prompt the user to enter a character and store it in R0.
+pub fn in() !void {
+    try stdout.writeAll("Enter a character: ");
+    const c = try stdin.reader().readByte();
+    registers.write(Reg.r0, c);
 }
 
 pub fn putsp() void {

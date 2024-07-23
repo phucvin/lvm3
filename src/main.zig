@@ -14,12 +14,9 @@ pub fn main() !void {
     registers.setCond(Cond.z); // One condition flag should always be set.
     registers.write(Reg.pc, start);
 
-    registers.write(Reg.r0, 35);
-    memory.write(35, 97);
-    memory.write(36, 98);
-    memory.write(37, 99);
-    memory.write(38, 100);
-    try tsr.puts();
+    std.debug.print("R0: {}\n", .{registers.read(Reg.r0)});
+    try tsr.in();
+    std.debug.print("R0: {}\n", .{registers.read(Reg.r0)});
 
     while (true) {
         const instr = memory.read(registers.read(Reg.pc));
