@@ -46,8 +46,23 @@ pub fn in() !void {
     registers.write(Reg.r0, c);
 }
 
-pub fn putsp() void {
-    unreachable;
+/// Write a string of characters from memory to the console, where two characters are
+/// stored in each memory location.
+pub fn putsp() !void {
+    var addr = registers.read(Reg.r0);
+    while (true) : (addr += 1) {
+        const cs = memory.read(addr);
+        if (cs == 0) {
+            break;
+        }
+        const c1 = cs & 0xFF;
+        const c2 = cs >> 8;
+        try stdout.writer().writeByte(@truncate(c1));
+        // Second byte may be null if the string is odd-length.
+        if (c2 != 0) {
+            try stdout.writer().writeByte(@truncate(c2));
+        }
+    }
 }
 
 pub fn halt() void {

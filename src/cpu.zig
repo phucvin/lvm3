@@ -164,7 +164,7 @@ pub fn trap(instr: u16) !void {
         tsr.Vec.out => try tsr.out(),
         tsr.Vec.puts => try tsr.puts(),
         tsr.Vec.in => try tsr.in(),
-        tsr.Vec.putsp => tsr.putsp(),
+        tsr.Vec.putsp => try tsr.putsp(),
         tsr.Vec.halt => tsr.halt(),
     }
 }
