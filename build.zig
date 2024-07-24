@@ -18,6 +18,10 @@ pub fn build(b: *std.Build) void {
     const run_step = b.step("run", "Run the application");
     run_step.dependOn(&run_exe.step);
 
+    if (b.args) |args| {
+        run_exe.addArgs(args);
+    }
+
     const unit_tests = b.addTest(.{
         .root_source_file = b.path("src/unit_tests.zig"),
         .target = target,
