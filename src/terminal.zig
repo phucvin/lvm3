@@ -31,8 +31,7 @@ pub fn inputIsAvailable() bool {
 /// Perform a clean shutdown of the program when a signal is received.
 pub fn signalHandler(sig: c_int) callconv(.C) void {
     _ = sig;
-    // Newline isn't required, errors can be ignored.
-    std.io.getStdOut().writeAll("### LVM-3 Shut Down Gracefully ###") catch {};
+    std.io.getStdOut().writeAll("### LVM-3 Shut Down Gracefully ###\n") catch {};
     restoreSettings();
     std.process.exit(0);
 }
