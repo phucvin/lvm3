@@ -23,12 +23,12 @@ pub fn main() !void {
     _ = std.os.linux.sigaction(std.os.linux.SIG.TERM, &act, null);
     terminal.disableCanonAndEcho();
 
-    try std.io.getStdOut().writeAll("### LVM-3 Booted ###\n");
+    std.io.getStdOut().writeAll("### LVM-3 Booted ###\n") catch {};
 
     const program_path = try utils.getProgramPathFromArgs() orelse return;
     try memory.loadProgram(program_path);
 
-    try std.io.getStdOut().writeAll("### Program Loaded ###\n");
+    std.io.getStdOut().writeAll("### Program Loaded ###\n") catch {};
 
     registers.write(Reg.pc, program_start);
     registers.setCond(Cond.z); // One condition flag should always be set.

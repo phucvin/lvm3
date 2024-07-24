@@ -7,6 +7,7 @@ const stdin = std.io.getStdIn();
 const stdout = std.io.getStdOut();
 const Reg = registers.Reg;
 
+/// Trap routine vectors.
 pub const Vec = enum(u8) {
     getc = 0x20,
     out = 0x21,
@@ -71,7 +72,7 @@ pub fn putsp() !void {
 
 /// Halt program execution.
 pub fn halt() !void {
-    try stdout.writeAll("### LVM-3 Halted Gracefully ###\n");
+    stdout.writeAll("### LVM-3 Halted Gracefully ###\n") catch {};
     terminal.restoreSettings();
     std.process.exit(0);
 }
