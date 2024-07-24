@@ -10,6 +10,18 @@ pub fn sext(num: u16, comptime og_bits: u4) u16 {
     return @bitCast(@as(i16, @bitCast(num << shift)) >> shift);
 }
 
+/// Get the path to the program from the command line arguments.
+pub fn getProgramPathFromArgs() ?[]const u8 {
+    var args = try std.process.argsWithAllocator(std.heap.page_allocator);
+    defer args.deinit();
+    if (args.inner.count != 2) {
+        std.debug.print("Usage: lvm3 <path to program>\n", .{});
+        return null;
+    }
+    _ = args.skip();
+    return args.next().?;
+}
+
 test "sign extend" {
     try std.testing.expectEqual(0b0000_0000_0000_0000, sext(0b1111_1111_1111_1111, 0));
     try std.testing.expectEqual(0b0000_0000_0000_0000, sext(0b1000_0000_0000_0000, 1));

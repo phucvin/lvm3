@@ -4,6 +4,7 @@ const registers = @import("registers.zig");
 const cpu = @import("cpu.zig");
 const tsr = @import("tsr.zig");
 const terminal = @import("terminal.zig");
+const utils = @import("utils.zig");
 
 const Reg = registers.Reg;
 const Cond = registers.Cond;
@@ -14,14 +15,15 @@ const start = 0x3000;
 pub fn main() !void {
     terminal.disableCanonAndEcho();
 
-    registers.setCond(Cond.z); // One condition flag should always be set.
-    registers.write(Reg.pc, start);
-
-    try memory.loadProgram("test");
+    const program_path = utils.getProgramPathFromArgs() orelse return;
+    try memory.loadProgram(program_path);
 
     std.debug.print("1st u16: {}", .{memory.read(0x3030)});
     std.debug.print("2nd u16: {}", .{memory.read(0x3031)});
     std.debug.print("3rd u16: {}", .{memory.read(0x3032)});
+
+    registers.write(Reg.pc, start);
+    registers.setCond(Cond.z); // One condition flag should always be set.
 
     while (true) {
         const instr = memory.read(registers.read(Reg.pc));
