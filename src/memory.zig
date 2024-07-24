@@ -1,20 +1,34 @@
 const std = @import("std");
+const terminal = @import("terminal.zig");
 
 const mem_size = std.math.maxInt(u16);
 
 var memory = [_]u16{0} ** mem_size;
 
+// Memory-mapped registers.
+const kbsr = 0xFE00; // Keyboard status register.
+const kbdr = 0xFE02; // Keyboard data register.
+
 /// Read the value at a memory address.
 pub fn read(addr: u16) u16 {
-    // Return 0 for out-of-bounds reads to avoid optional/result handling.
+    // Return 0 for out-of-bounds reads to avoid optional/error propagation.
     if (addr == mem_size) {
         return 0;
+    }
+    if (addr == kbsr) {
+        if (terminal.inputIsAvailable()) {
+            memory[kbsr] = 1 << 15;
+            // If the read fails, just keep the previous data to avoid error propagation.
+            memory[kbdr] = std.io.getStdIn().reader().readByte() catch memory[kbdr];
+        } else {
+            memory[kbsr] = 0;
+        }
     }
     return memory[addr];
 }
 /// Write a value to a memory address.
 pub fn write(addr: u16, val: u16) void {
-    // Ignore out-of-bounds writes to avoid result handling.
+    // Ignore out-of-bounds writes to avoid error propagation.
     if (addr == mem_size) {
         return;
     }
@@ -70,6 +84,12 @@ test "memory read and write" {
     write(addr, val);
     try std.testing.expectEqual(val, read(addr));
     try std.testing.expectEqual(0, read(addr + 1));
+
+    addr = kbsr;
+    val = 1 << 15;
+    write(addr, val);
+    try std.testing.expectEqual(0, read(addr));
+    try std.testing.expectEqual(0, read(kbdr));
 
     reset();
 }
