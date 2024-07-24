@@ -20,3 +20,10 @@ pub fn disableCanonAndEcho() void {
 pub fn restoreSettings() void {
     _ = linux.tcsetattr(linux.STDIN_FILENO, linux.TCSA.NOW, &og_termios);
 }
+
+/// Check whether the standard input has incoming data without blocking.
+pub fn inputIsAvailable() bool {
+    var fds = [_]linux.pollfd{.{ .fd = linux.STDIN_FILENO, .events = linux.POLL.IN, .revents = 0 }};
+    const reported_events = linux.poll(&fds, fds.len, 0);
+    return reported_events > 0 and (fds[0].revents & linux.POLL.IN) != 0;
+}

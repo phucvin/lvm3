@@ -30,7 +30,9 @@ pub fn main() !void {
         const op = cpu.getOp(instr);
         registers.incPc();
 
-        try tsr.in();
+        std.debug.print("Input is available: {}\n", .{terminal.inputIsAvailable()});
+
+        std.time.sleep(100000000);
 
         switch (op) {
             .br => cpu.br(instr),
