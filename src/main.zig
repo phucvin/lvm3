@@ -15,8 +15,12 @@ const start = 0x3000;
 pub fn main() !void {
     terminal.disableCanonAndEcho();
 
-    const program_path = utils.getProgramPathFromArgs() orelse return;
+    try std.io.getStdOut().writeAll("### LVM-3 Booted ###\n");
+
+    const program_path = try utils.getProgramPathFromArgs() orelse return;
     try memory.loadProgram(program_path);
+
+    try std.io.getStdOut().writeAll("### Program Loaded ###\n");
 
     registers.write(Reg.pc, start);
     registers.setCond(Cond.z); // One condition flag should always be set.

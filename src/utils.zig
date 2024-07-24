@@ -11,11 +11,11 @@ pub fn sext(num: u16, comptime og_bits: u4) u16 {
 }
 
 /// Get the path to the program from the command line arguments.
-pub fn getProgramPathFromArgs() ?[]const u8 {
+pub fn getProgramPathFromArgs() !?[]const u8 {
     var args = try std.process.argsWithAllocator(std.heap.page_allocator);
     defer args.deinit();
     if (args.inner.count != 2) {
-        std.debug.print("Usage: lvm3 <path to program>\n", .{});
+        try std.io.getStdOut().writeAll("Usage: lvm3 <path to program>\n");
         return null;
     }
     _ = args.skip();
