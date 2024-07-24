@@ -37,7 +37,7 @@ pub fn br(instr: u16) void {
     const pc_offset = utils.sext(instr & 0x1FF, 9);
     const cond = (instr >> 9) & 0x7;
     if ((cond & registers.read(Reg.cond)) != 0) {
-        registers.write(Reg.pc, registers.read(Reg.pc) + pc_offset);
+        registers.write(Reg.pc, registers.read(Reg.pc) +% pc_offset);
     }
 }
 
@@ -48,10 +48,10 @@ pub fn add(instr: u16) void {
     const imm_flag = (instr >> 5) & 0x1;
     if (imm_flag != 0) {
         const imm = utils.sext(instr & 0x1F, 5);
-        registers.write(dr, registers.read(sr1) + imm);
+        registers.write(dr, registers.read(sr1) +% imm);
     } else {
         const sr2: Reg = @enumFromInt(instr & 0x7);
-        registers.write(dr, registers.read(sr1) + registers.read(sr2));
+        registers.write(dr, registers.read(sr1) +% registers.read(sr2));
     }
     registers.updateCondFromReg(dr);
 }
@@ -60,7 +60,7 @@ pub fn add(instr: u16) void {
 pub fn ld(instr: u16) void {
     const dr: Reg = @enumFromInt((instr >> 9) & 0x7);
     const pc_offset = utils.sext(instr & 0x1FF, 9);
-    registers.write(dr, memory.read(registers.read(Reg.pc) + pc_offset));
+    registers.write(dr, memory.read(registers.read(Reg.pc) +% pc_offset));
     registers.updateCondFromReg(dr);
 }
 
@@ -68,7 +68,7 @@ pub fn ld(instr: u16) void {
 pub fn st(instr: u16) void {
     const sr: Reg = @enumFromInt((instr >> 9) & 0x7);
     const pc_offset = utils.sext(instr & 0x1FF, 9);
-    memory.write(registers.read(Reg.pc) + pc_offset, registers.read(sr));
+    memory.write(registers.read(Reg.pc) +% pc_offset, registers.read(sr));
 }
 
 /// Execute a jump register instruction.
@@ -79,7 +79,7 @@ pub fn jsr(instr: u16) void {
     if (imm_flag != 0) {
         // JSR.
         const pc_offset = utils.sext(instr & 0x7FF, 11);
-        registers.write(Reg.pc, pc + pc_offset);
+        registers.write(Reg.pc, pc +% pc_offset);
     } else {
         // JSRR.
         const base_r: Reg = @enumFromInt((instr >> 6) & 0x7);
@@ -107,7 +107,7 @@ pub fn ldr(instr: u16) void {
     const dr: Reg = @enumFromInt((instr >> 9) & 0x7);
     const base_r: Reg = @enumFromInt((instr >> 6) & 0x7);
     const offset = utils.sext(instr & 0x3F, 6);
-    registers.write(dr, memory.read(registers.read(base_r) + offset));
+    registers.write(dr, memory.read(registers.read(base_r) +% offset));
     registers.updateCondFromReg(dr);
 }
 
@@ -116,7 +116,7 @@ pub fn str(instr: u16) void {
     const sr: Reg = @enumFromInt((instr >> 9) & 0x7);
     const base_r: Reg = @enumFromInt((instr >> 6) & 0x7);
     const offset = utils.sext(instr & 0x3F, 6);
-    memory.write(registers.read(base_r) + offset, registers.read(sr));
+    memory.write(registers.read(base_r) +% offset, registers.read(sr));
 }
 
 /// Execute a bitwise NOT instruction.
@@ -131,7 +131,7 @@ pub fn not(instr: u16) void {
 pub fn ldi(instr: u16) void {
     const dr: Reg = @enumFromInt((instr >> 9) & 0x7);
     const pc_offset = utils.sext(instr & 0x1FF, 9);
-    registers.write(dr, memory.read(memory.read(registers.read(Reg.pc) + pc_offset)));
+    registers.write(dr, memory.read(memory.read(registers.read(Reg.pc) +% pc_offset)));
     registers.updateCondFromReg(dr);
 }
 
@@ -139,7 +139,7 @@ pub fn ldi(instr: u16) void {
 pub fn sti(instr: u16) void {
     const sr: Reg = @enumFromInt((instr >> 9) & 0x7);
     const pc_offset = utils.sext(instr & 0x1FF, 9);
-    memory.write(memory.read(registers.read(Reg.pc) + pc_offset), registers.read(sr));
+    memory.write(memory.read(registers.read(Reg.pc) +% pc_offset), registers.read(sr));
 }
 
 /// Execute a jump instruction (also handles return from subroutine).
@@ -152,7 +152,7 @@ pub fn jmp(instr: u16) void {
 pub fn lea(instr: u16) void {
     const dr: Reg = @enumFromInt((instr >> 9) & 0x7);
     const pc_offset = utils.sext(instr & 0x1FF, 9);
-    registers.write(dr, registers.read(Reg.pc) + pc_offset);
+    registers.write(dr, registers.read(Reg.pc) +% pc_offset);
     registers.updateCondFromReg(dr);
 }
 
@@ -209,6 +209,10 @@ test "branch" {
     br(0b0000_100_000000010);
     try std.testing.expectEqual(0x300d, registers.read(Reg.pc));
 
+    registers.write(Reg.pc, 0xFFFF);
+    br(0b0000_100_000000100);
+    try std.testing.expectEqual(0x3, registers.read(Reg.pc));
+
     registers.reset();
 }
 
@@ -228,6 +232,13 @@ test "add" {
 
     add(0b0101_000_100_1_00000);
     try std.testing.expectEqual(0, registers.read(Reg.r0));
+
+    registers.write(Reg.r0, 0xFFFF);
+    add(0b0101_000_000_0_00001);
+    try std.testing.expectEqual(7, registers.read(Reg.r0));
+    registers.write(Reg.r2, 0xFFFF);
+    add(0b0101_000_010_1_00010);
+    try std.testing.expectEqual(1, registers.read(Reg.r0));
 
     registers.reset();
 }
@@ -251,6 +262,11 @@ test "load" {
     ld(0b0010_001_000000101);
     try std.testing.expectEqual(0, registers.read(Reg.r1));
 
+    registers.write(Reg.pc, 0xFFFF);
+    memory.write(0x0, 100);
+    ld(0b0010_000_000000001);
+    try std.testing.expectEqual(100, registers.read(Reg.r0));
+
     registers.reset();
     memory.reset();
 }
@@ -271,6 +287,11 @@ test "store" {
     st(0b0011_010_000000111);
     try std.testing.expectEqual(0, memory.read(0x3009));
 
+    registers.write(Reg.pc, 0xFFFF);
+    registers.write(Reg.r0, 100);
+    st(0b0011_000_000000011);
+    try std.testing.expectEqual(100, memory.read(0x2));
+
     registers.reset();
     memory.reset();
 }
@@ -290,6 +311,11 @@ test "jump register" {
     jsr(0b0100_0_00110_000001);
     try std.testing.expectEqual(0x3001, registers.read(Reg.r7));
     try std.testing.expectEqual(0x4000, registers.read(Reg.pc));
+
+    registers.write(Reg.pc, 0xFFFF);
+    jsr(0b0100_1_00000_000101);
+    try std.testing.expectEqual(0xFFFF, registers.read(Reg.r7));
+    try std.testing.expectEqual(0x4, registers.read(Reg.pc));
 
     registers.reset();
 }
@@ -329,6 +355,11 @@ test "load register" {
     ldr(0b0110_010_001_000011);
     try std.testing.expectEqual(100, registers.read(Reg.r2));
 
+    registers.write(Reg.r0, 0xFFFF);
+    memory.write(0x0, 0x100);
+    ldr(0b0110_000_000_000001);
+    try std.testing.expectEqual(0x100, registers.read(Reg.r0));
+
     registers.reset();
     memory.reset();
 }
@@ -347,6 +378,10 @@ test "store register" {
 
     str(0b0111_010_011_000011);
     try std.testing.expectEqual(0xa, memory.read(103));
+
+    registers.write(Reg.r1, 0xFFFF);
+    str(0b0111_001_001_000111);
+    try std.testing.expectEqual(0xFFFF, memory.read(0x6));
 
     registers.reset();
     memory.reset();
@@ -387,6 +422,12 @@ test "load indirect" {
     ldi(0b1010_001_000000000);
     try std.testing.expectEqual(0, registers.read(Reg.r1));
 
+    registers.write(Reg.pc, 0xFFFF);
+    memory.write(0x0, 0xFFF0);
+    memory.write(0xFFF0, 5);
+    ldi(0b1010_000_000000001);
+    try std.testing.expectEqual(5, registers.read(Reg.r0));
+
     registers.reset();
     memory.reset();
 }
@@ -409,6 +450,11 @@ test "store indirect" {
 
     sti(0b1011_010_000000000);
     try std.testing.expectEqual(111, memory.read(1));
+
+    registers.write(Reg.pc, 0xFFFF);
+    memory.write(0x0, 123);
+    sti(0b1011_000_000000001);
+    try std.testing.expectEqual(0x5000, memory.read(123));
 
     registers.reset();
     memory.reset();
@@ -441,6 +487,10 @@ test "load effective address" {
 
     lea(0b1110_010_000000000);
     try std.testing.expectEqual(0x8000, registers.read(Reg.r2));
+
+    registers.write(Reg.pc, 0xFFFF);
+    lea(0b1110_110_000001001);
+    try std.testing.expectEqual(8, registers.read(Reg.r6));
 
     registers.reset();
 }

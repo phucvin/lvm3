@@ -18,10 +18,6 @@ pub fn main() !void {
     const program_path = utils.getProgramPathFromArgs() orelse return;
     try memory.loadProgram(program_path);
 
-    std.debug.print("1st u16: {}", .{memory.read(0x3030)});
-    std.debug.print("2nd u16: {}", .{memory.read(0x3031)});
-    std.debug.print("3rd u16: {}", .{memory.read(0x3032)});
-
     registers.write(Reg.pc, start);
     registers.setCond(Cond.z); // One condition flag should always be set.
 
@@ -29,10 +25,6 @@ pub fn main() !void {
         const instr = memory.read(registers.read(Reg.pc));
         const op = cpu.getOp(instr);
         registers.incPc();
-
-        std.debug.print("Input is available: {}\n", .{terminal.inputIsAvailable()});
-
-        std.time.sleep(100000000);
 
         switch (op) {
             .br => cpu.br(instr),
