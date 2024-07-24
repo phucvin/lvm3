@@ -10,9 +10,17 @@ const Reg = registers.Reg;
 const Cond = registers.Cond;
 const Op = cpu.Op;
 
-const start = 0x3000;
+var act = std.os.linux.Sigaction{
+    .handler = .{ .handler = terminal.signalHandler },
+    .mask = std.os.linux.empty_sigset,
+    .flags = 0,
+};
+
+const program_start = 0x3000;
 
 pub fn main() !void {
+    _ = std.os.linux.sigaction(std.os.linux.SIG.INT, &act, null);
+    _ = std.os.linux.sigaction(std.os.linux.SIG.TERM, &act, null);
     terminal.disableCanonAndEcho();
 
     try std.io.getStdOut().writeAll("### LVM-3 Booted ###\n");
@@ -22,7 +30,7 @@ pub fn main() !void {
 
     try std.io.getStdOut().writeAll("### Program Loaded ###\n");
 
-    registers.write(Reg.pc, start);
+    registers.write(Reg.pc, program_start);
     registers.setCond(Cond.z); // One condition flag should always be set.
 
     while (true) {

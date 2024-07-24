@@ -27,3 +27,12 @@ pub fn inputIsAvailable() bool {
     const reported_events = linux.poll(&fds, fds.len, 0);
     return reported_events > 0 and (fds[0].revents & linux.POLL.IN) != 0;
 }
+
+/// Perform a clean shutdown of the program when a signal is received.
+pub fn signalHandler(sig: c_int) callconv(.C) void {
+    _ = sig;
+    // Newline isn't required, errors can be ignored.
+    std.io.getStdOut().writeAll("### LVM-3 Shut Down Gracefully ###") catch {};
+    restoreSettings();
+    std.process.exit(0);
+}

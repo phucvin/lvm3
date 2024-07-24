@@ -71,7 +71,7 @@ pub fn putsp() !void {
 
 /// Halt program execution.
 pub fn halt() !void {
-    try stdout.writeAll("### LVM-3 Halted ###\n");
+    try stdout.writeAll("### LVM-3 Halted Gracefully ###\n");
     terminal.restoreSettings();
     std.process.exit(0);
 }
