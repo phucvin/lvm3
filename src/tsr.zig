@@ -1,6 +1,7 @@
 const std = @import("std");
 const registers = @import("registers.zig");
 const memory = @import("memory.zig");
+const terminal = @import("terminal.zig");
 
 const stdin = std.io.getStdIn();
 const stdout = std.io.getStdOut();
@@ -71,5 +72,6 @@ pub fn putsp() !void {
 /// Halt program execution.
 pub fn halt() !void {
     try stdout.writeAll("Halting execution.\n");
+    terminal.restoreSettings();
     std.process.exit(0);
 }
