@@ -71,5 +71,5 @@ pub fn putsp() !void {
 /// Halt program execution.
 pub fn halt() !void {
     try stdout.writeAll("Halting execution.\n");
-    std.os.linux.exit(0);
+    std.process.exit(0);
 }
