@@ -14,7 +14,7 @@ lvm3 <path to program file>
 The VM expects files that have been written in LC-3 assembly and preassembled into machine code.
 Two examples have been provided in the `programs` directory (credit to [Ryan Pendleton](https://github.com/rpendleton) and [Justin Meiners](https://github.com/justinmeiners)).
 
-<img src="https://github.com/user-attachments/assets/7d6fc253-35c8-447f-a2ac-722299061a3b">  <img src="https://github.com/user-attachments/assets/b3f03a04-d0f5-4a74-8496-59fae4cf8242"> 
+<img src="https://github.com/user-attachments/assets/7d6fc253-35c8-447f-a2ac-722299061a3b" width="400">  <img src="https://github.com/user-attachments/assets/b3f03a04-d0f5-4a74-8496-59fae4cf8242" width="400"> 
 
 ## Build Locally
 
