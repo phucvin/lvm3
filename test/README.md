@@ -20,3 +20,7 @@ python lc3.py tests/add-num.asm && ../lvm3/zig-out/bin/lvm3 tests/add-num-out.ob
 python lc3.py tests/hello2.asm && ../lvm3/zig-out/bin/lvm3 tests/hello2-out.obj
 
 python lc3.py ../lvm3/test/fib01.asm && ../lvm3/zig-out/bin/lvm3 ../lvm3/test/fib01-out.obj
+
+python lc3.py ../lvm3/test/fib02.asm && ../lvm3/zig-out/bin/lvm3 ../lvm3/test/fib02-out.obj
+
+(cd ../lvm3 && zig build) && python lc3.py ../lvm3/test/fib02.asm && ../lvm3/zig-out/bin/lvm3 ../lvm3/test/fib02-out.obj
