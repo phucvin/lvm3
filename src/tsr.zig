@@ -73,7 +73,7 @@ pub fn putsp() !void {
 /// Halt program execution.
 pub fn halt() !void {
     stdout.writeAll("### LVM-3 Halted Gracefully ###\n") catch {};
-    try stdout.writer().print("r0={d} r1={d} r2={d} r3={d} r4={d} r5={d} r6={d} r7={d} pc={d} cond={d} \n",
+    try stdout.writer().print("r0={d} r1={d} r2={d} r3={d} r4={d} r5={d} r6={d} r7=0x{x} pc=0x{x} cond={d} \n",
             .{registers.read(Reg.r0), registers.read(Reg.r1), registers.read(Reg.r2), registers.read(Reg.r3), registers.read(Reg.r4), registers.read(Reg.r5), registers.read(Reg.r6), registers.read(Reg.r7), registers.read(Reg.pc), registers.read(Reg.cond)});
     terminal.restoreSettings();
     std.process.exit(0);

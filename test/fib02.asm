@@ -1,4 +1,11 @@
 .ORIG x3000
-ADD R0,R0,#15
+
+JSR L0
+ADD R0, R0, #7
 HALT
+
+FIB
+AND R0, R0, #0
+RET
+
 .END
